@@ -2,6 +2,7 @@ import Booking from '#models/booking'
 import Desktop from '#models/desktop'
 import { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
+import type { Request } from '@adonisjs/http-server'
 
 export default class DesktopController {
   async index() {
@@ -10,7 +11,7 @@ export default class DesktopController {
 
   async book({ request, response }: HttpContext) {
     console.log('book')
-    const error = await this.checkBooking(request, response)
+    const error = await this.checkBooking(request)
     if (error) {
       return response.status(400).send(error)
     }
@@ -23,7 +24,7 @@ export default class DesktopController {
     return booking
   }
 
-  async checkBooking(request: any, response: any): Promise<string | undefined> {
+  async checkBooking(request: any): Promise<string | undefined> {
     // check if desktop exists
     if (request.body().desktopId) {
       const desktop = await Desktop.find(request.body().desktopId)

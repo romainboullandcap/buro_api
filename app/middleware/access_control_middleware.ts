@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
 import { errors } from '@adonisjs/auth'
 import Booking from '#models/booking'
+import User from '#models/user'
 
 export default class AccessControlMiddleware {
   async handle(ctx: HttpContext, next: NextFn) {
@@ -10,9 +11,10 @@ export default class AccessControlMiddleware {
      */
     // check if user is making booking for himself
     const email = await this.getEmailForRequest(ctx)
-    if (ctx.auth.user.email !== email) {
+    const user: User = ctx.auth.user
+    if (user.email !== email) {
       console.warn(
-        `L'utilisateur ${ctx.auth.user.email} a tenté de créer une réservation pour l'utilisateur ${email}`
+        `L'utilisateur ${user.email} a tenté de créer une réservation pour l'utilisateur ${email}`
       )
       throw new errors.E_UNAUTHORIZED_ACCESS('Unauthorized access 🩻💣🚔', {
         guardDriverName: 'AccessControlMiddleware',

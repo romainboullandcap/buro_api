@@ -1,4 +1,3 @@
-import { Authenticators } from '@adonisjs/auth/types'
 import { HttpContext } from '@adonisjs/core/http'
 import { NextFn } from '@adonisjs/core/types/http'
 
@@ -8,13 +7,7 @@ export default class AuthMiddleware {
    */
   redirectTo = '/login'
 
-  async handle(
-    ctx: HttpContext,
-    next: NextFn,
-    options: {
-      guards?: (keyof Authenticators)[]
-    } = {}
-  ) {
+  async handle(ctx: HttpContext, next: NextFn) {
     await ctx.auth.authenticate()
     return next()
   }

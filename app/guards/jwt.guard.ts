@@ -3,11 +3,12 @@ import { AuthClientResponse, GuardContract } from '@adonisjs/auth/types'
 import { JwtUserProviderContract } from './jwt.auth.js'
 import jwt from 'jsonwebtoken'
 import { HttpContext } from '@adonisjs/core/http'
+import User from '#models/user'
 
 export type JwtGuardOptions = {
   secret: string
 }
-export class JwtGuard<UserProvider extends JwtUserProviderContract<unknown>>
+export class JwtGuard<UserProvider extends JwtUserProviderContract<User>>
   implements GuardContract<UserProvider[typeof symbols.PROVIDER_REAL_USER]>
 {
   #ctx: HttpContext

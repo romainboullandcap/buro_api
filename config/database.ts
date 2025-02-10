@@ -1,6 +1,5 @@
 import env from '#start/env'
 import { defineConfig } from '@adonisjs/lucid'
-import fs from 'node:fs'
 
 /*
 host: env.get('DB_HOST'),

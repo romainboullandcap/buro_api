@@ -13,9 +13,7 @@ export default class AccessControlMiddleware {
     const email = await this.getEmailForRequest(ctx)
     const user: User = ctx.auth.user
     if (user.email !== email) {
-      console.warn(
-        `L'utilisateur ${user.email} a tenté de créer une réservation pour l'utilisateur ${email}`
-      )
+      console.warn(`L'utilisateur ${user.email} a tenté de une action pour l'utilisateur ${email}`)
       throw new errors.E_UNAUTHORIZED_ACCESS('Unauthorized access 🩻💣🚔', {
         guardDriverName: 'AccessControlMiddleware',
       })
@@ -28,7 +26,6 @@ export default class AccessControlMiddleware {
   }
 
   async getEmailForRequest(ctx: HttpContext) {
-    console.log('params', ctx.request.parsedUrl.path)
     if (ctx.request.parsedUrl.path === '/desktop/book' && ctx.request.method() === 'POST') {
       return ctx.request.body().email
     } else if (

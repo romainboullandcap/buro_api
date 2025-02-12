@@ -21,6 +21,10 @@ router.post('/register', [AuthController, 'register'])
 // allow all
 router.get('desktop', [DesktopController, 'index']).use(middleware.auth())
 router
-  .post('desktop/book', [DesktopController, 'book'])
+  .group(() => {
+    router.post('desktop/book', [DesktopController, 'book'])
+    router.post('desktop/bookList', [DesktopController, 'bookList'])
+  })
   .use([middleware.auth(), middleware.accessControl()])
+
 router.delete('booking/:id', [BookingController, 'delete']).use([middleware.auth()])

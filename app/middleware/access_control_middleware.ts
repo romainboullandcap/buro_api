@@ -26,7 +26,11 @@ export default class AccessControlMiddleware {
   }
 
   async getEmailForRequest(ctx: HttpContext) {
-    if (ctx.request.parsedUrl.path === '/desktop/book' && ctx.request.method() === 'POST') {
+    if (
+      (ctx.request.parsedUrl.path === '/desktop/book' ||
+        ctx.request.parsedUrl.path === '/desktop/bookList') &&
+      ctx.request.method() === 'POST'
+    ) {
       return ctx.request.body().email
     } else if (
       ctx.request.parsedUrl.path?.startsWith('/booking') &&
@@ -35,7 +39,6 @@ export default class AccessControlMiddleware {
       const booking = await Booking.find(ctx.request.params().id)
 
       if (booking !== null) {
-        console.log('booking', booking.email)
         return booking.email
       } else {
         return 'booking_inconnu'

@@ -92,7 +92,10 @@ export default class DesktopController {
 
   getSearchDate(date: Date): DateTime {
     const dateX: Date = new Date(date)
-    let searchDate = DateTime.fromISO(dateX.toISOString(), { zone: 'Europe/Paris' })
+    let searchDate = DateTime.fromISO(dateX.toISOString(), {
+      zone: 'Europe/Paris',
+      locale: 'fr-FR',
+    })
     // normaliser la partie heure (si le front ne l'a pas fait)
     return searchDate.set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
   }

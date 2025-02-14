@@ -11,15 +11,19 @@ export default class DesktopController {
   async bookList({ request, response }: HttpContext) {
     const bookingList: Booking[] = []
     for (const date of request.body().dateList) {
-      await this.makeBooking(request.body().desktopId, request.body().email, date)
-        .then((booking) => {
-          bookingList.push(booking)
-        })
-        .catch((error) => {
-          console.log(' catch error', error)
-          return response.status(400).send(error.message)
-        })
+      try {
+        const createdBooking = await this.makeBooking(
+          request.body().desktopId,
+          request.body().email,
+          date
+        )
+        bookingList.push(createdBooking)
+      } catch (err) {
+        console.log(' catch error', err)
+        return response.status(400).send(err.message)
+      }
     }
+    return response.status(200).send(bookingList)
   }
 
   async makeBooking(desktopId: number, email: string, date: Date): Promise<Booking> {
@@ -81,7 +85,7 @@ export default class DesktopController {
 
     if (existingBookingForUser !== null) {
       const desktop = await Desktop.find(existingBookingForUser!.desktop_id)
-      return `Vous avez déjà une réservation ${this.getDateString(searchDate)}  pour le bureau:  ${desktop!.name}`
+      return `Vous avez déjà une réservation le ${this.getDateString(searchDate)} pour le bureau ${desktop!.id}`
     }
     return ''
   }
@@ -94,6 +98,6 @@ export default class DesktopController {
   }
 
   getDateString(date: DateTime) {
-    return `${date.toJSDate().getDate() < 9 ? '0' + date.toJSDate().getDate() : date.toJSDate().getDate()}/${date.toJSDate().getMonth() < 9 ? '0' + date.toJSDate().getMonth() : date.toJSDate().getMonth()}/${date.toJSDate().getFullYear()}`
+    return date.toLocaleString()
   }
 }

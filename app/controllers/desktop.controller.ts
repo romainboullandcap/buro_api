@@ -1,7 +1,6 @@
 import Booking from '#models/booking'
 import Desktop from '#models/desktop'
 import { HttpContext } from '@adonisjs/core/http'
-import { Database } from '@adonisjs/lucid/database'
 import db from '@adonisjs/lucid/services/db'
 import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 export default class DesktopController {
@@ -90,7 +89,7 @@ export default class DesktopController {
     })
 
     if (existingBookingForUser !== null) {
-      const desktop = await Desktop.find(existingBookingForUser!.desktop_id)
+      const desktop = await Desktop.find(existingBookingForUser!.desktopId)
       return `Vous avez déjà une réservation le ${this.getDateString(date)} pour le bureau ${desktop!.id}`
     }
     return ''

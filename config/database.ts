@@ -9,6 +9,7 @@ host: env.get('DB_HOST'),
         database: env.get('DB_DATABASE'),
         */
 const dbConfig = defineConfig({
+  prettyPrintDebugQueries: true,
   connection: 'postgres',
 
   connections: {
@@ -22,6 +23,7 @@ const dbConfig = defineConfig({
         naturalSort: true,
         paths: ['database/migrations'],
       },
+      debug: true,
     },
   },
 })

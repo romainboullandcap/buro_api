@@ -5,10 +5,11 @@ export default class extends BaseSchema {
 
   async up() {
     this.schema.alterTable(this.tableName, (table) => {
-      table.unique(['desktopId', 'date'])
+      table.renameColumn('desktop_id', 'desktopId')
     })
   }
 
   async down() {
+    
   }
 }

@@ -19,7 +19,7 @@ export default class Desktop extends BaseModel {
   @column()
   declare angle: number
 
-  @hasMany(() => Booking, { foreignKey: 'desktop_id' })
+  @hasMany(() => Booking, { foreignKey: 'desktopId', localKey : 'id' })
   declare bookings: HasMany<typeof Booking>
 
   @column.dateTime({ autoCreate: true })

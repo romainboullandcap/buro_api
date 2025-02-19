@@ -6,7 +6,7 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
-      table.integer('desktop_id').unsigned().references('desktops.id').onDelete('CASCADE') // delete booking when buro is deleted
+      table.integer('desktopId').unsigned().references('desktops.id').onDelete('CASCADE') // delete booking when buro is deleted
       table.timestamp('date')
       table.string('email')
       table.timestamp('created_at')

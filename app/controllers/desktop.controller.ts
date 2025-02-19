@@ -1,44 +1,61 @@
 import Booking from '#models/booking'
 import Desktop from '#models/desktop'
 import { HttpContext } from '@adonisjs/core/http'
-import { DateTime } from 'luxon'
-
+import { Database } from '@adonisjs/lucid/database'
+import db from '@adonisjs/lucid/services/db'
+import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 export default class DesktopController {
+
+  trx! : TransactionClientContract;
+  
   async index() {
     return await Desktop.query().preload('bookings')
   }
 
   async bookList({ request, response }: HttpContext) {
     const bookingList: Booking[] = []
-    for (const date of request.body().dateList) {
-      try {
-        const createdBooking = await this.makeBooking(
-          request.body().desktopId,
-          request.body().email,
-          date
-        )
-        bookingList.push(createdBooking)
-      } catch (err) {
-        console.log(' catch error', err)
-        return response.status(400).send(err.message)
-      }
+    
+    this.trx = await db.transaction()
+    try {
+      for (const date of request.body().dateList) {
+        try {
+          const createdBooking = await this.makeBooking(
+            request.body().desktopId,
+            request.body().email,
+            date
+          )
+          bookingList.push(createdBooking)
+        } catch (err) {
+          console.log('catch error', err)
+          return response.status(400).send(err.message)
+        }        
     }
+    await this.trx.commit()
+  } catch (error) {
+    await this.trx.rollback()
+    return response.status(400).send(error.message)
+  }
     return response.status(200).send(bookingList)
   }
 
   async makeBooking(desktopId: number, email: string, date: Date): Promise<Booking> {
-    const error = await this.checkBooking(desktopId, email, date)
+    /*const error = await this.checkBooking(desktopId, email, date)
     if (error) {
       throw new Error(error)
-    }
-    console.log("Make booking date", this.getSearchDate(date))
-    const booking = await Booking.create({
-      desktop_id: desktopId,
+    }*/
+    console.log("Make booking date", date)
+
+    const bookingList = await this.trx.insertQuery<Booking>()
+    .table('bookings')
+    .returning(['id', 'desktopId', 'email', 'date'])
+    .insert({
+      desktopId: desktopId,
       email: email,
-      date: this.getSearchDate(date),
-    })
-    console.log('booking created ', booking.desktop_id, booking.date, booking.email)
-    return booking
+      date: date,
+    });
+
+    console.log('booking created ', bookingList)
+    return bookingList[0];
   }
 
   async checkBooking(desktopId: number, email: string, date: Date): Promise<string | undefined> {
@@ -53,11 +70,9 @@ export default class DesktopController {
     }
 
     // check if user can make booking
-    const searchDate = this.getSearchDate(date)
-    console.log('searchDate desktopId', searchDate, desktopId)
     const existingBookingForDesktop = await Booking.findBy({
       desktop_id: desktopId,
-      date: searchDate,
+      date: date,
     })
     console.log("existingBookingForDesktop", existingBookingForDesktop)
     if (existingBookingForDesktop !== null) {
@@ -71,27 +86,19 @@ export default class DesktopController {
     // rechercher une réservation pour l'utilisateur et la date
     const existingBookingForUser = await Booking.findBy({
       email: email,
-      date: searchDate,
+      date: date,
     })
 
     if (existingBookingForUser !== null) {
       const desktop = await Desktop.find(existingBookingForUser!.desktop_id)
-      return `Vous avez déjà une réservation le ${this.getDateString(searchDate)} pour le bureau ${desktop!.id}`
+      return `Vous avez déjà une réservation le ${this.getDateString(date)} pour le bureau ${desktop!.id}`
     }
     return ''
   }
 
-  getSearchDate(date: Date): DateTime {
-    const dateX: Date = new Date(date)
-    let searchDate = DateTime.fromISO(dateX.toISOString(), {
-      zone: 'Europe/Paris',
-      locale: 'fr-FR',
-    })
-    // normaliser la partie heure (si le front ne l'a pas fait)
-    return searchDate.set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
-  }
 
-  getDateString(date: DateTime) {
+
+  getDateString(date: Date) {
     return date.toLocaleString()
   }
 }

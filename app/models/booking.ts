@@ -5,10 +5,7 @@ export default class Booking extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
-  @column.date({
-    serialize: (value) => value,
-    consume: (value) => value,
-  })
+  @column.date()
   declare date: DateTime
 
   @column()

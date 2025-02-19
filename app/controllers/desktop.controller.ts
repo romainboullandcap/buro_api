@@ -64,11 +64,12 @@ export default class DesktopController {
 
     // check if user can make booking
     const searchDate = this.getSearchDate(date)
-    console.log('searchDate', searchDate)
+    console.log('searchDate desktopId', searchDate, desktopId)
     const existingBookingForDesktop = await Booking.findBy({
       desktop_id: desktopId,
       date: searchDate,
     })
+    console.log("existingBookingForDesktop", existingBookingForDesktop)
     if (existingBookingForDesktop !== null) {
       if (existingBookingForDesktop.email === email) {
         return 'Vous avez déjà une réservation pour ce bureau et ce jour'

@@ -31,6 +31,7 @@ export default class DesktopController {
     if (error) {
       throw new Error(error)
     }
+    console.log("Make booking date", this.getSearchDate(date))
     const booking = await Booking.create({
       desktop_id: desktopId,
       email: email,
@@ -38,17 +39,6 @@ export default class DesktopController {
     })
     console.log('booking created ', booking.desktop_id, booking.date, booking.email)
     return booking
-  }
-
-  async book({ request, response }: HttpContext) {
-    return this.makeBooking(
-      request.body().desktopId,
-      request.body().email,
-      request.body().date
-    ).catch((error) => {
-      console.log('error', error)
-      return response.status(400).send(error.message)
-    })
   }
 
   async checkBooking(desktopId: number, email: string, date: Date): Promise<string | undefined> {

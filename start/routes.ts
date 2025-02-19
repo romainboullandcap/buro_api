@@ -22,7 +22,6 @@ router.post('/register', [AuthController, 'register'])
 router.get('desktop', [DesktopController, 'index']).use(middleware.auth())
 router
   .group(() => {
-    router.post('desktop/book', [DesktopController, 'book'])
     router.post('desktop/bookList', [DesktopController, 'bookList'])
   })
   .use([middleware.auth(), middleware.accessControl()])

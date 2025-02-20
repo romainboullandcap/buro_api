@@ -51,6 +51,8 @@ export default class DesktopController {
       desktopId: desktopId,
       email: email,
       date: date,
+      created_at : new Date(),
+      updated_at : new Date(),
     });
 
     console.log('booking created ', bookingList)

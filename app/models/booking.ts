@@ -5,11 +5,7 @@ export default class Booking extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
-  @column({
-    consume: (v: string) => {
-      return v+"".substring(0,10);
-    },
-  })
+  @column()
   declare date: Date
 
   @column({columnName : 'desktopId'})

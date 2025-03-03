@@ -8,7 +8,8 @@ export default class AuthController {
     const { email, password } = request.all()
     const user = await User.verifyCredentials(email, password)
     const guard: JwtGuard<any> = await auth.use('jwt')
-    return guard.generate(user)
+    const token = await guard.generate(user);
+    return {...token, user : user}
   }
 
   async register({ request, response }: HttpContext) {

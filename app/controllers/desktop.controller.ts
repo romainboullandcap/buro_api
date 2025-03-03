@@ -1,5 +1,6 @@
 import Booking from '#models/booking'
 import Desktop from '#models/desktop'
+import User from '#models/user'
 import { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import { TransactionClientContract } from '@adonisjs/lucid/types/database'
@@ -7,11 +8,12 @@ export default class DesktopController {
 
   trx! : TransactionClientContract;
   
-  async index() {
-    return await Desktop.query().preload('bookings')
+  async list() {
+    return await Desktop.query().preload('bookings', (postsQuery) => {
+      postsQuery.preload('user')});
   }
 
-  async bookList({ request, response }: HttpContext) {
+  async bookList({ request, response, auth }: HttpContext) {
     const bookingList: Booking[] = []
     
     this.trx = await db.transaction()
@@ -20,7 +22,7 @@ export default class DesktopController {
         try {
           const createdBooking = await this.makeBooking(
             request.body().desktopId,
-            request.body().email,
+            (auth.user as User).id,
             date
           )
           bookingList.push(createdBooking)
@@ -37,7 +39,7 @@ export default class DesktopController {
     return response.status(200).send(bookingList)
   }
 
-  async makeBooking(desktopId: number, email: string, date: Date): Promise<Booking> {
+  async makeBooking(desktopId: number, userId: number, date: Date): Promise<Booking> {
     /*const error = await this.checkBooking(desktopId, email, date)
     if (error) {
       throw new Error(error)
@@ -46,10 +48,10 @@ export default class DesktopController {
 
     const bookingList = await this.trx.insertQuery<Booking>()
     .table('bookings')
-    .returning(['id', 'desktopId', 'email', 'date'])
+    .returning(['id', 'desktopId', 'userId', 'date'])
     .insert({
       desktopId: desktopId,
-      email: email,
+      userId: userId,
       date: date,
       created_at : new Date(),
       updated_at : new Date(),
@@ -59,7 +61,8 @@ export default class DesktopController {
     return bookingList[0];
   }
 
-  async checkBooking(desktopId: number, email: string, date: Date): Promise<string | undefined> {
+  // vérification des contraintes en amont de la bdd pour pouvoir générer un message user friendly
+  async checkBooking(desktopId: number, userId: number, date: Date): Promise<string | undefined> {
     // check if desktop exists
     if (desktopId) {
       const desktop = await Desktop.find(desktopId)
@@ -77,7 +80,7 @@ export default class DesktopController {
     })
     console.log("existingBookingForDesktop", existingBookingForDesktop)
     if (existingBookingForDesktop !== null) {
-      if (existingBookingForDesktop.email === email) {
+      if (existingBookingForDesktop.user.id === userId) {
         return 'Vous avez déjà une réservation pour ce bureau et ce jour'
       } else {
         return 'Le bureau est déjà réservé'
@@ -86,20 +89,14 @@ export default class DesktopController {
 
     // rechercher une réservation pour l'utilisateur et la date
     const existingBookingForUser = await Booking.findBy({
-      email: email,
+      userId: userId,
       date: date,
     })
 
     if (existingBookingForUser !== null) {
       const desktop = await Desktop.find(existingBookingForUser!.desktopId)
-      return `Vous avez déjà une réservation le ${this.getDateString(date)} pour le bureau ${desktop!.id}`
+      return `Vous avez déjà une réservation le ${date.toLocaleString()} pour le bureau ${desktop!.id}`
     }
     return ''
-  }
-
-
-
-  getDateString(date: Date) {
-    return date.toLocaleString()
   }
 }
